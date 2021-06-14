@@ -1,3 +1,6 @@
 import { startDb } from "./utils/db";
+import { seed } from './seeds';
 
-startDb().catch(console.log);
+startDb().then(async () => {
+    await seed();
+})
