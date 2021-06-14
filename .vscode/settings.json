@@ -1,0 +1,13 @@
+{
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 4,
+  "editor.formatOnSave": false,
+  "eslint.validate": ["typescript"],
+  "eslint.packageManager": "yarn",
+  "editor.rulers": [80, 100],
+  "editor.snippetSuggestions": "top",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "git.ignoreLimitWarning": true,
+}

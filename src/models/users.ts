@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export interface UserType {
-    _id?: string;
-    username: string;
-    role: "manager" | "employee"
+  _id?: string;
+  username: string;
+  role: "manager" | "employee";
 }
 
-type UserDoc = UserType & mongoose.Document
+type UserDoc = UserType & mongoose.Document;
 
-interface UserModel extends mongoose.Model<UserDoc> {}
+type UserModel = mongoose.Model<UserDoc>;
 
 const userSchema = new mongoose.Schema<UserDoc, UserModel>(
   {
@@ -19,15 +19,15 @@ const userSchema = new mongoose.Schema<UserDoc, UserModel>(
       required: true,
     },
     role: {
-        type: String,
-        enum: ["manager", "employee"],
-        required: true
-    }
+      type: String,
+      enum: ["manager", "employee"],
+      required: true,
+    },
   },
   {
     _id: false,
     versionKey: false,
-    collection: 'grocery_users'
+    collection: "grocery_users",
   }
 );
 
