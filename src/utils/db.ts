@@ -1,14 +1,15 @@
 import mongoose from "mongoose";
+import { Danger, Log } from "./log";
 
-export const startDb = async () => {
+export const startDb = async (): Promise<void> => {
   try {
     await mongoose.connect("mongodb://localhost:27017/", {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: true,
     });
-    console.log("connected to db");
+    Log("connected to db");
   } catch (e) {
-    console.error(e);
+    Danger(e);
   }
 };
