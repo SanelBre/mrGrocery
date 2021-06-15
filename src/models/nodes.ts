@@ -10,9 +10,12 @@ export interface NodeType {
   nodeType?: "office" | "store";
 }
 
-type NodeDoc = NodeType & mongoose.Document;
+export type NodeDoc = NodeType & mongoose.Document;
 
-type NodeModel = mongoose.Model<NodeDoc>;
+type NodeModel = mongoose.Model<NodeDoc> & {
+  findByEmployeeId: (id: string) => Promise<NodeDoc>;
+  findByManagerId: (id: string) => Promise<NodeDoc>;
+};
 
 const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
   {
@@ -36,5 +39,19 @@ const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
     collection: "grocery_nodes",
   }
 );
+
+nodeSchema.statics.findByEmployeeId = async function (
+  employeeId: string
+): Promise<NodeDoc> {
+  const node = await this.findOne({ employees: { $in: [employeeId] } }).exec();
+  return node;
+};
+
+nodeSchema.statics.findByManagerId = async function (
+  managerId: string
+): Promise<NodeDoc> {
+  const node = await this.findOne({ managers: { $in: [managerId] } }).exec();
+  return node;
+};
 
 export const Node = mongoose.model("Node", nodeSchema);

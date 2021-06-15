@@ -1,15 +1,15 @@
 import "express-async-errors";
 import express from "express";
-import { json } from "body-parser";
+import { json, urlencoded } from "body-parser";
 
-import { startDb } from "./utils/db";
+import { startDb, Log } from "./utils";
 import { seed } from "./seeds";
-import { Log } from "./utils/log";
 
 const PORT = process.env.PORT ?? 8000;
 
 const app = express();
 
+app.use(urlencoded({ extended: false }));
 app.use(json());
 
 app.all("*", async () => {
@@ -18,5 +18,5 @@ app.all("*", async () => {
 
 startDb().then(async () => {
   await seed();
-  app.listen(PORT, () => Log(`The app is listening on port: ${PORT}`));
+  app.listen(PORT, () => Log(`🚀 Server listening at port: ${PORT}`));
 });
