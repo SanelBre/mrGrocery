@@ -10,6 +10,7 @@ const users: UserType[] = Array(111)
     const user: UserType = {
       _id: uuidv4(),
       username: faker.internet.userName(),
+      email: faker.internet.email(),
       role: index % 3 ? availableUserRoles[1] : availableUserRoles[0],
     };
 

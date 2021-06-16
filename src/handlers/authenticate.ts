@@ -2,9 +2,9 @@ import express, { Request, Response } from "express";
 import { BadRequestError } from "../utils/errors";
 import * as services from "./services";
 
-const router = express.Router();
+const handler = express.Router();
 
-router.post("/authenticate", async (req: Request, res: Response) => {
+handler.post("/authenticate", async (req: Request, res: Response) => {
   const { username } = req.body;
 
   if (!username) throw new BadRequestError("username is required");
@@ -16,3 +16,5 @@ router.post("/authenticate", async (req: Request, res: Response) => {
     token: user.token,
   });
 });
+
+export { handler as authHandler };

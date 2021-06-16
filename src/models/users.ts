@@ -1,11 +1,14 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import { JWT_KEY } from "../utils";
 
 export interface UserType {
   _id: string;
   username: string;
   role: "manager" | "employee";
+  email?: string;
+  deleated?: boolean;
   token?: string;
 }
 
@@ -32,15 +35,29 @@ const userSchema = new mongoose.Schema<UserDoc, UserModel>(
       enum: ["manager", "employee"],
       required: true,
     },
+    email: {
+      type: String,
+      required: false,
+    },
+    deleated: {
+      type: Boolean,
+      default: false,
+    },
     token: {
       type: String,
-      expires: 10000,
+      expires: 1000,
     },
   },
   {
     _id: false,
     versionKey: false,
     collection: "grocery_users",
+    toJSON: {
+      transform(_doc, ret) {
+        delete ret.deleated;
+        delete ret.token;
+      },
+    },
   }
 );
 
@@ -69,7 +86,7 @@ userSchema.methods.generateToken = function (): string {
       id: this.id,
       email: this.username,
     },
-    process.env.JWT_KEY
+    JWT_KEY
   );
 };
 

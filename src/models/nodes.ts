@@ -13,8 +13,7 @@ export interface NodeType {
 export type NodeDoc = NodeType & mongoose.Document;
 
 type NodeModel = mongoose.Model<NodeDoc> & {
-  findByEmployeeId: (id: string) => Promise<NodeDoc>;
-  findByManagerId: (id: string) => Promise<NodeDoc>;
+  findByUserId: (id: string) => Promise<NodeDoc>;
 };
 
 const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
@@ -40,17 +39,12 @@ const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
   }
 );
 
-nodeSchema.statics.findByEmployeeId = async function (
-  employeeId: string
+nodeSchema.statics.findByUserId = async function (
+  userId: string
 ): Promise<NodeDoc> {
-  const node = await this.findOne({ employees: { $in: [employeeId] } }).exec();
-  return node;
-};
-
-nodeSchema.statics.findByManagerId = async function (
-  managerId: string
-): Promise<NodeDoc> {
-  const node = await this.findOne({ managers: { $in: [managerId] } }).exec();
+  const node = await this.findOne({
+    $or: [{ employees: userId }, { managers: userId }],
+  });
   return node;
 };
 
