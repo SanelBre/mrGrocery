@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { JWT_KEY } from "../utils";
 
-const availableRoles = ["manager", "employee"];
+export const availableRoles = ["manager", "employee"];
 
 export interface UserType {
   _id: string;
@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema<UserDoc, UserModel>(
     username: {
       type: String,
       required: true,
+      unique: true,
     },
     role: {
       type: String,
@@ -64,21 +65,21 @@ const userSchema = new mongoose.Schema<UserDoc, UserModel>(
 );
 
 userSchema.statics.findById = async function (id: string): Promise<UserDoc> {
-  const user = await this.findOne({ _id: id }).exec();
+  const user = await this.findOne({ _id: id });
   return user;
 };
 
 userSchema.statics.findByUsername = async function (
   username: string
 ): Promise<UserDoc> {
-  const user = await this.findOne({ username }).exec();
+  const user = await this.findOne({ username });
   return user;
 };
 
 userSchema.statics.findByToken = async function (
   token: string
 ): Promise<UserDoc> {
-  const user = await this.findOne({ token }).exec();
+  const user = await this.findOne({ token });
   return user;
 };
 

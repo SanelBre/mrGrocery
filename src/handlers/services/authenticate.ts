@@ -1,14 +1,18 @@
-import { NotFoundError } from "../../utils/errors";
-import { User, UserDoc } from "../../models/users";
+import { UserDoc } from "../../models/users";
+import { getUserByUsername, getUserById } from "./user";
 
 export const authenticate = async (username: string): Promise<UserDoc> => {
-  const user = await User.findByUsername(username);
+  const dbUser = await getUserByUsername(username);
 
-  if (!user) throw new NotFoundError("User not found");
+  dbUser.token = dbUser.generateToken();
 
-  user.token = user.generateToken();
+  return dbUser.save();
+};
+
+export const unauthenticate = async (userId: string): Promise<void> => {
+  const user = await getUserById(userId);
+
+  user.token = null;
 
   await user.save();
-
-  return user;
 };

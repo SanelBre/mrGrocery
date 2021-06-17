@@ -1,31 +1,42 @@
-import { BadRequestError } from "../../utils/errors";
-import { User, UserDoc } from "../../models/users";
-import { Node } from "../../models/nodes";
-
-export const getNodeUsersByUserId = async (
-  userId: string
-): Promise<UserDoc[]> => {
-  const dbUser = await User.findById(userId);
-
-  if (!dbUser) throw new BadRequestError(`user id [${userId}] is not valid`);
-
-  const isManager = dbUser.role === "manager";
-
-  const node = await Node.findByUserId(userId);
-
-  const nodeUserIds = [...node.employees, ...(isManager && node.managers)];
-
-  return Promise.all(
-    nodeUserIds.map(async (id) => {
-      return User.findById(id);
-    })
-  );
-};
+import { BadRequestError, NotFoundError } from "../../utils/errors";
+import { User, UserDoc, UserType } from "../../models/users";
+import { getNodeById, getNodeByUserId } from "./node";
 
 export const getUserById = async (id: string): Promise<UserDoc> => {
   const dbUser = await User.findById(id);
 
+  if (!dbUser || dbUser.deleated) throw new NotFoundError("user was not found");
+
   return dbUser;
+};
+
+export const getUserByUsername = async (username: string): Promise<UserDoc> => {
+  const dbUser = await User.findByUsername(username);
+
+  if (dbUser)
+    throw new BadRequestError(`username [${username} is already taken]`);
+
+  return dbUser;
+};
+
+export const getNodeUsersByUserId = async (
+  userId: string
+): Promise<UserDoc[]> => {
+  const dbUser = await getUserById(userId);
+
+  const isManager = dbUser.role === "manager";
+
+  const node = await getNodeByUserId(userId);
+
+  const nodeUserIds = [...node.employees, ...(isManager && node.managers)];
+
+  const users = await Promise.all(
+    nodeUserIds.map(async (id) => {
+      return User.findById(id);
+    })
+  );
+
+  return users?.filter((user) => !user.deleated);
 };
 
 export const updateUser = async (payload: {
@@ -36,7 +47,7 @@ export const updateUser = async (payload: {
 }): Promise<UserDoc> => {
   const { id, username, email, role } = payload;
 
-  const dbUser = await User.findById(id);
+  const dbUser = await getUserById(id);
 
   if (username) dbUser.username = username;
 
@@ -48,7 +59,38 @@ export const updateUser = async (payload: {
 };
 
 export const deleteUserById = async (id: string): Promise<void> => {
-  const dbUser = await User.findById(id);
+  const dbUser = await getUserById(id);
 
   dbUser.deleated = true;
+
+  await dbUser.save();
+};
+
+export const createUser = async (payload: {
+  username: string;
+  role: UserType["role"];
+  nodeId: string;
+  email?: string;
+}): Promise<UserDoc> => {
+  const { username, role, nodeId, email } = payload;
+
+  await getUserByUsername(username);
+
+  const node = await getNodeById(nodeId);
+
+  const user = new User({
+    username,
+    role,
+    email,
+  });
+
+  if (role === "manager") node.managers.push(user._id);
+  else if (role === "employee") node.employees.push(user._id);
+  else throw new Error("UNEXPECTED_ERROR");
+
+  const newUser = await user.save();
+
+  await node.save();
+
+  return newUser;
 };

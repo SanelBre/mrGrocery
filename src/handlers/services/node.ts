@@ -2,18 +2,40 @@ import { BadRequestError, NotFoundError } from "../../utils/errors";
 import { User, UserDoc } from "../../models/users";
 import { Node, NodeDoc } from "../../models/nodes";
 
+export const getNodeById = async (id: string): Promise<NodeDoc> => {
+  const node = await Node.findById(id);
+
+  if (!node) throw new NotFoundError(`node with id [${id}] is not found`);
+
+  return node;
+};
+
+export const getNodeByUserId = async (userId: string): Promise<NodeDoc> => {
+  const node = await Node.findByUserId(userId);
+
+  if (!node) throw new NotFoundError("node was not found");
+
+  return node;
+};
+
+export const getAllNodes = async (): Promise<NodeDoc[]> => {
+  const nodes = await Node.find();
+
+  return nodes ?? [];
+};
+
 export const getEmployeesByNodeId = async (
   nodeId: string
 ): Promise<UserDoc[]> => {
-  const node = await Node.findById(nodeId);
+  const node = await getNodeById(nodeId);
 
-  if (!node) throw new BadRequestError(`node id [${nodeId}] is not valid`);
-
-  return Promise.all(
+  const employees = await Promise.all(
     node.employees.map(async (id) => {
       return User.findById(id);
     })
   );
+
+  return employees?.filter((employee) => !employee.deleated);
 };
 
 export const getEmployeesWithDescendantsByNodeId = async (
@@ -39,7 +61,9 @@ export const getEmployeesWithDescendantsByNodeId = async (
     )
   ).flat();
 
-  return [...descendantEmployees, ...employees];
+  return [...descendantEmployees, ...employees].filter(
+    (employee) => !employee.deleated
+  );
 };
 
 export const getManagersByNodeId = async (
@@ -49,11 +73,13 @@ export const getManagersByNodeId = async (
 
   if (!node) throw new BadRequestError(`node id [${nodeId}] is not valid`);
 
-  return Promise.all(
+  const managers = await Promise.all(
     node.managers.map(async (id) => {
       return User.findById(id);
     })
   );
+
+  return managers?.filter((manager) => !manager.deleated);
 };
 
 export const getManagersWithDescendantsByNodeId = async (
@@ -79,21 +105,9 @@ export const getManagersWithDescendantsByNodeId = async (
     )
   ).flat();
 
-  return [...descendantEmployees, ...managers];
-};
-
-export const getAllNodes = async (): Promise<NodeDoc[]> => {
-  const nodes = await Node.find();
-
-  return nodes ?? [];
-};
-
-export const getNodeById = async (id: string): Promise<NodeDoc> => {
-  const node = await Node.findById(id);
-
-  if (!node) throw new NotFoundError(`node with id [${id}] is not found`);
-
-  return node;
+  return [...descendantEmployees, ...managers].filter(
+    (manager) => !manager.deleated
+  );
 };
 
 export const updateNode = async (payload: {

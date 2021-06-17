@@ -7,51 +7,49 @@ import * as services from "./services";
 
 const handler = express.Router();
 
-handler.get(
-  "/node/:id/employees",
-  requireAuth(),
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { descendants } = req.query;
+const getNodeEmployeesWithOrWithoutDescendants = async (
+  req: Request,
+  res: Response
+) => {
+  const { id } = req.params;
+  const { descendants } = req.query;
 
-    if (!id) throw new BadRequestError("node id is missing");
+  if (!id) throw new BadRequestError("node id is missing");
 
-    const withDescendants = /^true$/i.test(descendants?.toString());
+  const withDescendants = /^true$/i.test(descendants?.toString());
 
-    const employees = withDescendants
-      ? await services.getEmployeesWithDescendantsByNodeId(id)
-      : await services.getEmployeesByNodeId(id);
+  const employees = withDescendants
+    ? await services.getEmployeesWithDescendantsByNodeId(id)
+    : await services.getEmployeesByNodeId(id);
 
-    return res.status(200).send(employees);
-  }
-);
+  return res.status(200).send(employees);
+};
 
-handler.get(
-  "/node/:id/managers",
-  requireAuth(),
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { descendants } = req.query;
+const getNodeManagersWithOrWithoutDescendants = async (
+  req: Request,
+  res: Response
+) => {
+  const { id } = req.params;
+  const { descendants } = req.query;
 
-    if (!id) throw new BadRequestError("node id is missing");
+  if (!id) throw new BadRequestError("node id is missing");
 
-    const withDescendants = /^true$/i.test(descendants?.toString());
+  const withDescendants = /^true$/i.test(descendants?.toString());
 
-    const employees = withDescendants
-      ? await services.getManagersWithDescendantsByNodeId(id)
-      : await services.getManagersByNodeId(id);
+  const employees = withDescendants
+    ? await services.getManagersWithDescendantsByNodeId(id)
+    : await services.getManagersByNodeId(id);
 
-    return res.status(200).send(employees);
-  }
-);
+  return res.status(200).send(employees);
+};
 
-handler.get("/node", async (req: Request, res: Response) => {
+const getAllNodes = async (req: Request, res: Response) => {
   const nodes = await services.getAllNodes();
 
   return res.status(200).send(nodes);
-});
+};
 
-handler.get("/node/:id", async (req: Request, res: Response) => {
+const getNodeById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!Types.ObjectId.isValid(id))
@@ -60,9 +58,9 @@ handler.get("/node/:id", async (req: Request, res: Response) => {
   const node = await services.getNodeById(id);
 
   return res.status(200).send(node);
-});
+};
 
-handler.patch("/node/:id", requireAuth, async (req: Request, res: Response) => {
+const updateNodeById = async (req: Request, res: Response) => {
   const { id } = req.params;
   const { name, nodeType } = req.body;
 
@@ -86,6 +84,20 @@ handler.patch("/node/:id", requireAuth, async (req: Request, res: Response) => {
   });
 
   return res.status(201).send();
-});
+};
+
+handler.get(
+  "/node/:id/employees",
+  requireAuth(),
+  getNodeEmployeesWithOrWithoutDescendants
+);
+handler.get(
+  "/node/:id/managers",
+  requireAuth(),
+  getNodeManagersWithOrWithoutDescendants
+);
+handler.get("/node", getAllNodes);
+handler.get("/node/:id", getNodeById);
+handler.patch("/node/:id", requireAuth("manager"), updateNodeById);
 
 export { handler as nodeHandler };
