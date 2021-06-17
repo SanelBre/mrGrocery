@@ -13,8 +13,7 @@ export const getUserById = async (id: string): Promise<UserDoc> => {
 export const getUserByUsername = async (username: string): Promise<UserDoc> => {
   const dbUser = await User.findByUsername(username);
 
-  if (dbUser)
-    throw new BadRequestError(`username [${username} is already taken]`);
+  if (!dbUser) throw new NotFoundError(`user was not found`);
 
   return dbUser;
 };
@@ -74,7 +73,10 @@ export const createUser = async (payload: {
 }): Promise<UserDoc> => {
   const { username, role, nodeId, email } = payload;
 
-  await getUserByUsername(username);
+  const dbUser = await getUserByUsername(username).catch(() => null);
+
+  if (dbUser)
+    throw new BadRequestError(`username [${username}] is already taken`);
 
   const node = await getNodeById(nodeId);
 

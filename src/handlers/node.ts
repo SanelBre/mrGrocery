@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { Types } from "mongoose";
+import validate from "uuid-validate";
 import { awailableNodeTypes } from "../models/nodes";
 import { requireAuth } from "../middlewares/AuthRequester";
 import { BadRequestError, NotAuthorizedError } from "../utils/errors";
@@ -52,8 +52,7 @@ const getAllNodes = async (req: Request, res: Response) => {
 const getNodeById = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  if (!Types.ObjectId.isValid(id))
-    throw new BadRequestError("invalid id provided");
+  if (!validate(id, 4)) throw new BadRequestError("invalid id provided");
 
   const node = await services.getNodeById(id);
 

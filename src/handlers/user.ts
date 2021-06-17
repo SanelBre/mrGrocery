@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { Types } from "mongoose";
+import validate from "uuid-validate";
 import { availableRoles, User } from "../models/users";
 import { requireAuth } from "../middlewares/AuthRequester";
 import { BadRequestError, NotAuthorizedError } from "../utils/errors";
@@ -56,7 +56,7 @@ const deleteUserById = async (req: Request, res: Response) => {
 
   if (!dbUser) throw new BadRequestError(`user id [${id}] is not valid`);
 
-  if (dbUser.role !== "manager" && req.user.id !== id)
+  if (req.user.role !== "manager" && req.user.id !== id)
     throw new NotAuthorizedError("u cant do that");
 
   await services.deleteUserById(id);
@@ -67,8 +67,7 @@ const deleteUserById = async (req: Request, res: Response) => {
 const createUser = async (req: Request, res: Response) => {
   const { username, role, nodeId, email } = req.body;
 
-  if (!Types.ObjectId.isValid(nodeId))
-    throw new BadRequestError("invalid id provided");
+  if (!validate(nodeId)) throw new BadRequestError("invalid id provided");
 
   if (!username)
     throw new BadRequestError("valid username property is required");
@@ -87,7 +86,7 @@ const createUser = async (req: Request, res: Response) => {
 };
 
 handler.get("/user/:id/node", requireAuth(), getNodeUsersById);
-handler.get("/user/:id", requireAuth(), getUserById);
+handler.get("/user/:id", getUserById);
 handler.patch("/user/:id", requireAuth(), updateUserById);
 handler.delete("/user/:id", requireAuth(), deleteUserById);
 handler.post("/user", requireAuth("manager"), createUser);
