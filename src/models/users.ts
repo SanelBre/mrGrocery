@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { JWT_KEY } from "../utils";
 
+const availableRoles = ["manager", "employee"];
+
 export interface UserType {
   _id: string;
   username: string;
@@ -32,7 +34,7 @@ const userSchema = new mongoose.Schema<UserDoc, UserModel>(
     },
     role: {
       type: String,
-      enum: ["manager", "employee"],
+      enum: availableRoles,
       required: true,
     },
     email: {

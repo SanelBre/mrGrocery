@@ -1,6 +1,6 @@
-import { BadRequestError } from "../../utils/errors";
+import { BadRequestError, NotFoundError } from "../../utils/errors";
 import { User, UserDoc } from "../../models/users";
-import { Node } from "../../models/nodes";
+import { Node, NodeDoc } from "../../models/nodes";
 
 export const getEmployeesByNodeId = async (
   nodeId: string
@@ -80,4 +80,35 @@ export const getManagersWithDescendantsByNodeId = async (
   ).flat();
 
   return [...descendantEmployees, ...managers];
+};
+
+export const getAllNodes = async (): Promise<NodeDoc[]> => {
+  const nodes = await Node.find();
+
+  return nodes ?? [];
+};
+
+export const getNodeById = async (id: string): Promise<NodeDoc> => {
+  const node = await Node.findById(id);
+
+  if (!node) throw new NotFoundError(`node with id [${id}] is not found`);
+
+  return node;
+};
+
+export const updateNode = async (payload: {
+  id: string;
+  name?: string;
+  nodeType?: string;
+}): Promise<void> => {
+  const node = await Node.findById(payload.id);
+
+  if (!node)
+    throw new NotFoundError(`node with id [${payload.id}] is not found`);
+
+  if (payload.name) node.name = payload.name;
+
+  if (payload.nodeType) node.name = payload.nodeType;
+
+  await node.save();
 };

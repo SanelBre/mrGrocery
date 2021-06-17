@@ -8,7 +8,7 @@ const handler = express.Router();
 
 handler.get(
   "/user/:id/node",
-  requireAuth,
+  requireAuth(),
   async (req: Request, res: Response) => {
     const { id } = req.params;
 
@@ -20,7 +20,7 @@ handler.get(
   }
 );
 
-handler.get("/user/:id", requireAuth, async (req: Request, res: Response) => {
+handler.get("/user/:id", requireAuth(), async (req: Request, res: Response) => {
   const { id } = req.params;
 
   const user = await services.getUserById(id);
@@ -28,33 +28,37 @@ handler.get("/user/:id", requireAuth, async (req: Request, res: Response) => {
   return res.status(200).send(user);
 });
 
-handler.put("/user/:id", requireAuth, async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { username, role, email } = req.body;
+handler.patch(
+  "/user/:id",
+  requireAuth(),
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { username, role, email } = req.body;
 
-  if (role !== "manager" && role !== "employee")
-    throw new BadRequestError("role is not valid");
+    if (role !== "manager" && role !== "employee")
+      throw new BadRequestError("role is not valid");
 
-  const dbUser = await User.findById(id);
+    const dbUser = await User.findById(id);
 
-  if (!dbUser) throw new BadRequestError(`user id [${id}] is not valid`);
+    if (!dbUser) throw new BadRequestError(`user id [${id}] is not valid`);
 
-  if (dbUser.role !== "manager" && req.user.id !== id)
-    throw new NotAuthorizedError("u cant do that");
+    if (dbUser.role !== "manager" && req.user.id !== id)
+      throw new NotAuthorizedError("u cant do that");
 
-  const employees = await services.updateUser({
-    id,
-    username,
-    role: role as "manager" | "employee",
-    email,
-  });
+    const employees = await services.updateUser({
+      id,
+      username,
+      role: role as "manager" | "employee",
+      email,
+    });
 
-  return res.status(201).send(employees);
-});
+    return res.status(201).send(employees);
+  }
+);
 
 handler.delete(
   "/user/:id",
-  requireAuth,
+  requireAuth(),
   async (req: Request, res: Response) => {
     const { id } = req.params;
 

@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
+export const awailableNodeTypes = ["office", "store"];
+
 export interface NodeType {
   _id?: string;
   name: string;
@@ -28,7 +30,7 @@ const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
     descendants: [String],
     nodeType: {
       type: String,
-      enum: ["office", "store"],
+      enum: awailableNodeTypes,
       default: "office",
     },
   },
@@ -36,6 +38,11 @@ const nodeSchema = new mongoose.Schema<NodeDoc, NodeModel>(
     _id: false,
     versionKey: false,
     collection: "grocery_nodes",
+    toJSON: {
+      transform(_doc, ret) {
+        delete ret.descendants;
+      },
+    },
   }
 );
 
