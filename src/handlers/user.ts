@@ -36,7 +36,7 @@ const updateUserById = async (req: Request, res: Response) => {
 
   if (!dbUser) throw new BadRequestError(`user id [${id}] is not valid`);
 
-  if (dbUser.role !== "manager" && req.user.id !== id)
+  if (req.user.role !== "manager" && req.user.id !== id)
     throw new NotAuthorizedError("u cant do that");
 
   const employees = await services.updateUser({
