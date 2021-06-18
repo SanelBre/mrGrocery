@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ts-node-dev --poll src/main.ts",
     "clean-start": "ts-node-dev --poll src/main.ts --seed",
+    "seed": "ts-node src/seeds/__run.ts",
     "build": "tsc"
   },
   "keywords": [],
