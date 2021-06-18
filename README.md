@@ -59,98 +59,98 @@ On ubuntu this could be run to get mongodb installed:
 
 ## api doc
 
-### authentication
+### Authentication:
 
-POST -> /authenticate
-authentication: N
-params: /
-body:
+#### POST -> /authenticate
+- authentication: N
+- params: /
+- body:
   - username* | string - username of an user from the base
 - authenticate with a valid username and recieve a token used to pass the authorizations
 
-DELETE -> /authenticate
-authentication: y | bearer token
-params: /
-body: /
+#### DELETE -> /authenticate
+- authentication: y | bearer token
+- params: /
+- body: .
 - removes the token from the user that is making the request with a valid token
 
-### users
+### Users:
 
-POST -> /user
-authentication: y | bearer token | requires to be a manager
-params: /
-body:
+#### POST -> /user
+- authentication: y | bearer token | requires to be a manager
+- params: /
+- body:
   - username* | string
   - role* | employee / manager
   - nodeId* | string - uuid of existing node
   - email | string - not required
-- should create a new user with the choosen role
+- description: should create a new user with the choosen role
 
-DELETE -> /user/:id
-authentication: y | bearer token
-params:
+#### DELETE -> /user/:id
+- authentication: y | bearer token
+- params:
   - id | uuid of existing non deleted user
-body: /
-- should set the delete flag of a non deleted user to true, its a soft delete
+- body: .
+- description: should set the delete flag of a non deleted user to true, its a soft delete
 
-PATCH -> /user/:id
-authentication: y | bearer token
-params:
+#### PATCH -> /user/:id
+- authentication: y | bearer token
+- params:
   - id | uuid of existing non deleted user
-body:
+- body:
   - username | string
   - role | employee / manager
   - email | string - not required
-- updates any user with the role of manager, or own data with the role of employee
+- description: updates any user with the role of manager, or own data with the role of employee
 
-GET -> /user/:id
-authentication: N
-params:
+#### GET -> /user/:id
+- authentication: N
+- params:
   - id | uuid of existing non deleted user
-body: /
-- gets a target user by the provided id
+- body: .
+- description: gets a target user by the provided id
 
-GET -> /user/:id/node
-authentication: y | bearer token
-params:
+#### GET -> /user/:id/node
+- authentication: y | bearer token
+- params:
   - id | uuid of existing non deleted user
-body: /
-- gets all users of a node that the user with the provided id belongs to
+- body: .
+- description: gets all users of a node that the user with the provided id belongs to
 
-### nodes
+### Nodes:
 
-GET -> /node/:id/employees?descendants={true/false}
-authentication: y | bearer token
-params:
+#### GET -> /node/:id/employees?descendants={true/false}
+- authentication: y | bearer token
+- params:
   - id | uuid of existing node
-body: /
-- get employees of the target node, if descendants query param is set to true it will also pickup all the employees from them, all of them are non deleted
+- body: .
+- description: get employees of the target node, if descendants query param is set to true it will also pickup all the employees from them, all of them are non deleted
 
-GET -> /node/:id/managers?descendants={true/false}
-authentication: y | bearer token
-params:
+#### GET -> /node/:id/managers?descendants={true/false}
+- authentication: y | bearer token
+- params:
   - id | uuid of existing node
-body: /
-- get managers of the target node, if descendants query param is set to true it will also pickup all the managers from them, all of them are non deleted
+- body: .
+- description: get managers of the target node, if descendants query param is set to true it will also pickup all the managers from them, all of them are non deleted
 
-GET -> /node
-authentication: N
-params: /
-body: /
-- gets all nodes from the base
+#### GET -> /node
+- authentication: N
+- params: /
+- body: .
+- description: gets all nodes from the base
 
-GET -> /node/:id
-authentication: N
-params:
+#### GET -> /node/:id
+- authentication: N
+- params:
   - id | uuid of existing node
-body: /
-- gets a target node by its id
+- body: .
+- description: gets a target node by its id
 
-PATCH -> /node/:id
-authentication: y | bearer token | requires to be a manager
-params:
+#### PATCH -> /node/:id
+- authentication: y | bearer token | requires to be a manager
+- params:
   - id | uuid of existing node
-body:
+- body:
   - name | string - name of the node
   - nodeType | office / store
-- updates a target node with either the name or nodeType or both
+- description: updates a target node with either the name or nodeType or both
