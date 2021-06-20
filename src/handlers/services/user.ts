@@ -13,7 +13,7 @@ export const getUserById = async (id: string): Promise<UserDoc> => {
 export const getUserByUsername = async (username: string): Promise<UserDoc> => {
   const dbUser = await User.findByUsername(username);
 
-  if (!dbUser) throw new NotFoundError(`user was not found`);
+  if (!dbUser || dbUser.deleated) throw new NotFoundError(`user was not found`);
 
   return dbUser;
 };
@@ -27,7 +27,7 @@ export const getNodeUsersByUserId = async (
 
   const node = await getNodeByUserId(userId);
 
-  const nodeUserIds = [...node.employees, ...(isManager && node.managers)];
+  const nodeUserIds = [...node.employees, ...(isManager ? node.managers : [])];
 
   const users = await Promise.all(
     nodeUserIds.map(async (id) => {
@@ -40,9 +40,9 @@ export const getNodeUsersByUserId = async (
 
 export const updateUser = async (payload: {
   id: string;
-  username: string;
-  email: string;
-  role: "manager" | "employee";
+  username?: string;
+  email?: string;
+  role?: "manager" | "employee";
 }): Promise<UserDoc> => {
   const { id, username, email, role } = payload;
 
@@ -54,7 +54,9 @@ export const updateUser = async (payload: {
 
   if (role) dbUser.role = role;
 
-  return dbUser.save();
+  await dbUser.save();
+
+  return dbUser;
 };
 
 export const deleteUserById = async (id: string): Promise<void> => {
@@ -80,7 +82,7 @@ export const createUser = async (payload: {
 
   const node = await getNodeById(nodeId);
 
-  const user = new User({
+  const user = await User.create({
     username,
     role,
     email,
@@ -90,9 +92,9 @@ export const createUser = async (payload: {
   else if (role === "employee") node.employees.push(user._id);
   else throw new Error("UNEXPECTED_ERROR");
 
-  const newUser = await user.save();
+  await user.save();
 
   await node.save();
 
-  return newUser;
+  return user;
 };

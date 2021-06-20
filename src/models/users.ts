@@ -14,6 +14,12 @@ export interface UserType {
   token?: string;
 }
 
+interface UserCreate {
+  username: UserType["username"];
+  role: UserType["role"];
+  email: UserType["email"];
+}
+
 export type UserDoc = UserType &
   mongoose.Document & {
     generateToken: () => string;
@@ -23,6 +29,7 @@ type UserModel = mongoose.Model<UserDoc> & {
   findById: (id: string) => Promise<UserDoc>;
   findByUsername: (username: string) => Promise<UserDoc>;
   findByToken: (username: string) => Promise<UserDoc>;
+  create: (payload: UserCreate) => Promise<UserDoc>;
 };
 
 const userSchema = new mongoose.Schema<UserDoc, UserModel>(
@@ -94,3 +101,5 @@ userSchema.methods.generateToken = function (): string {
 };
 
 export const User = mongoose.model("User", userSchema);
+
+userSchema.statics.create = (payload: UserCreate) => new User(payload);
