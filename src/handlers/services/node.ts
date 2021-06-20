@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from "../../utils/errors";
 import { User, UserDoc } from "../../models/users";
-import { Node, NodeDoc } from "../../models/nodes";
+import { Node, NodeDoc, NodeType } from "../../models/nodes";
 
 export const getNodeById = async (id: string): Promise<NodeDoc> => {
   const node = await Node.findById(id);
@@ -69,9 +69,7 @@ export const getEmployeesWithDescendantsByNodeId = async (
 export const getManagersByNodeId = async (
   nodeId: string
 ): Promise<UserDoc[]> => {
-  const node = await Node.findById(nodeId);
-
-  if (!node) throw new BadRequestError(`node id [${nodeId}] is not valid`);
+  const node = await getNodeById(nodeId);
 
   const managers = await Promise.all(
     node.managers.map(async (id) => {
@@ -113,7 +111,7 @@ export const getManagersWithDescendantsByNodeId = async (
 export const updateNode = async (payload: {
   id: string;
   name?: string;
-  nodeType?: string;
+  nodeType?: NodeType["nodeType"];
 }): Promise<void> => {
   const node = await Node.findById(payload.id);
 
@@ -122,7 +120,7 @@ export const updateNode = async (payload: {
 
   if (payload.name) node.name = payload.name;
 
-  if (payload.nodeType) node.name = payload.nodeType;
+  if (payload.nodeType) node.nodeType = payload.nodeType;
 
   await node.save();
 };

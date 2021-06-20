@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import validate from "uuid-validate";
-import { awailableNodeTypes } from "../models/nodes";
+import { awailableNodeTypes, NodeType } from "../models/nodes";
 import { requireAuth } from "../middlewares/AuthRequester";
 import { BadRequestError, NotAuthorizedError } from "../utils/errors";
 import * as services from "./services";
@@ -79,7 +79,7 @@ const updateNodeById = async (req: Request, res: Response) => {
   await services.updateNode({
     id,
     name,
-    nodeType,
+    nodeType: <NodeType["nodeType"]>nodeType,
   });
 
   return res.status(201).send();

@@ -5,6 +5,7 @@ interface UserSampleRequest {
   role?: UserType["role"];
   username?: UserType["username"];
   email?: UserType["email"];
+  token?: UserType["token"];
 }
 
 const userSample = (payload?: UserSampleRequest): UserType => ({
@@ -13,11 +14,12 @@ const userSample = (payload?: UserSampleRequest): UserType => ({
   role: payload?.role ?? "manager",
   email: payload?.email ?? "someUserEmail",
   deleated: !!payload?.deleated,
-  token: "someUserAuthToken",
+  token: payload?.token,
 });
 
 export const sampleUserDoc = (payload?: UserSampleRequest): UserDoc =>
   <UserDoc>{
     ...userSample(payload),
     save: () => this,
+    generateToken: () => "newToken",
   };
